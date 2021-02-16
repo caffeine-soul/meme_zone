@@ -1,0 +1,80 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block body_attribs %}
+style="background-color: tomato"
+{% endblock %}
+
+{% block title %} Meme Zone- Upload Meme! {% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href={{ url_for('static', filename='/css/form.css')}}>
+{% endblock %}
+
+
+{% block navbar %}
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" <a href="{{ url_for('routes.start_page') }}">Meme Zone</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{{ url_for('routes.upload_page') }}">Upload Meme</a></li>
+        <li><a href="{{ url_for('routes.memes_get') }}">View Memes</a></li>
+      </ul>
+      <ul class="nav navbar-nav" style="margin-left: auto;">
+        <li><a href="{{ url_for('routes.about') }}">About</a></li>
+      </ul>
+    </div>
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+<h1 style="text-align: center; font-weight:bold; font-size:400%;">Meme Zone</h1>
+<section class="Form" style="margin-top: 25px;">
+    <div class="container">
+        <div class="row" style="background: white; border-radius: 30px;">
+            <div class="col-lg-5">
+                <img src={{ url_for('static', filename='images/undraw_upload.png') }} class="img-fluid" alt="" width="460" height="460" style="border-radius: 30px;">
+            </div>
+            <div class="col-lg-7" style="padding: 10px 100px;">
+                 <h3 style="padding-left: 15px; font-weight: bold;">Upload a meme!</h3>
+                 <form action="" method="POST">
+                    {{ form.csrf_token }}
+                     <div class="form-row">
+                         <div class="col-lg-7">
+                            {{ wtf.form_field(form.uploader_name, class='form-control', placeholder='Enter you name here') }}
+                         </div>
+                     </div>
+                     <div class="form-row">
+                        <div class="col-lg-7">
+                            {{ wtf.form_field(form.meme_caption, class='form-control', placeholder='Enter a caption for the meme') }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-lg-7">
+                            {{ wtf.form_field(form.meme_url, class='form-control', placeholder='URL for the meme') }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-lg-7">
+                            <div class="checkbox">
+                                {{ wtf.form_field(form.another_entry_cb, class='form-control') }}
+                                <!-- <label><input type="checkbox" value="">Upload another meme</label> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-lg-7">
+                            <button type="submit" class="btn1" style="border: none; outline: none; height: 50px; width:100%; font-weight: bold; background-color: black; color: white; border-radius: 5px;">Upload</button>
+                        </div>
+                    </div>
+                 </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "bootstrap/base.html" %}
+
+{% block body_attribs %}
+style="background-color: tomato"
+{% endblock %}
+
+{% block title %} Meme Zone- Meme Gallery!  {% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href={{ url_for('static', filename='/css/memes.css')}}>
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" <a href="{{ url_for('routes.start_page') }}">Meme Zone</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{{ url_for('routes.upload_page') }}">Upload Meme</a></li>
+        <li><a href="{{ url_for('routes.memes_get') }}">View Memes</a></li>
+      </ul>
+      <ul class="nav navbar-nav" style="margin-left: auto;">
+        <li><a href="{{ url_for('routes.about') }}">About</a></li>
+      </ul>
+    </div>
+  </nav>
+{% endblock %}
+
+{% block content %} 
+<h1> Meme Gallery</h1>
+
+{% for i in range(0, len) %}
+<div class="gallery" style="float:left; width: 30%; margin: 5px; border: 2px solid black;">
+  <a href="{{ url_for('routes.get_meme_by_id', meme_id='{{ meme_list[i][0] }}') }}" target="_blank" alt="">
+  <img src="{{ meme_list[i][3] }}" alt="{{ meme_list[i][2] }}" style="width: 100%; height: auto;">
+  </a>
+  <div class="meme_details">
+    <div>
+      {{ meme_list[i][2] }}
+    </div>
+    <div>
+      {{ meme_list[i][1] }}
+    </div>
+    <div>
+      Meme_Id: {{ meme_list[i][0] }}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}
