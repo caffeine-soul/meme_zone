@@ -11,4 +11,4 @@ class UploaderForm(FlaskForm):
     submit = SubmitField("Submit!")
 def meme_info():
     form = UploaderForm()
-    return form.validate_on_submit(), form
+    return form

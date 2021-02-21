@@ -18,8 +18,7 @@ style="background-color: tomato"
         <a class="navbar-brand" <a href="{{ url_for('routes.start_page') }}">Meme Zone</a>
       </div>
       <ul class="nav navbar-nav">
-        <li class="active"><a href="{{ url_for('routes.upload_page') }}">Upload Meme</a></li>
-        <li><a href="{{ url_for('routes.memes_get') }}">View Memes</a></li>
+        <li class="active"><a href={{ url_for('routes.memes', start_page_var="True") }}>Upload Meme</a></li>
       </ul>
       <ul class="nav navbar-nav" style="margin-left: auto;">
         <li><a href="{{ url_for('routes.about') }}">About</a></li>
@@ -31,20 +30,20 @@ style="background-color: tomato"
 {% block content %} 
 <h1> Meme Gallery</h1>
 
-{% for i in range(0, len) %}
+{% for list_itr in meme_list %}
 <div class="gallery" style="float:left; width: 30%; margin: 5px; border: 2px solid black;">
-  <a href="{{ url_for('routes.get_meme_by_id', meme_id='{{ meme_list[i][0] }}') }}" target="_blank" alt="">
-  <img src="{{ meme_list[i][3] }}" alt="{{ meme_list[i][2] }}" style="width: 100%; height: auto;">
+  <a href = {{ url_for('routes.get_meme_by_id', meme_id=list_itr['meme_id']  ) }} target="_blank" alt="">
+  <img src="{{ list_itr['meme_url']}}" alt="{{ list_itr['meme_caption'] }}" style="width: 100%; height: auto;">
   </a>
   <div class="meme_details">
     <div>
-      {{ meme_list[i][2] }}
+      {{ list_itr['uploader_name'] }}
     </div>
     <div>
-      {{ meme_list[i][1] }}
+      {{ list_itr['meme_caption'] }}
     </div>
     <div>
-      Meme_Id: {{ meme_list[i][0] }}
+      meme_Id: {{ list_itr['meme_id'] }}
     </div>
   </div>
 </div>

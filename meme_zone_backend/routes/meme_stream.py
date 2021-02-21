@@ -18,7 +18,7 @@ def api_memes_post():
     meme_caption = data["caption"]
     meme_url = data["url"]
     meme_id = str(uuid.uuid4())
-    insert_dttm = datetime.utcnow() 
+    insert_dttm = str(datetime.utcnow()) 
     try:
         db.meme_info.insert_one({ "uploader_name": uploader_name, "meme_caption": meme_caption,
         "meme_url": meme_url, "meme_id": meme_id, "insert_dttm": insert_dttm})
@@ -40,8 +40,7 @@ def api_memes_get():
 @app.route("/memes/<meme_id>", methods=["GET"])
 def api_get_meme_by_id(meme_id):
     try:
-        meme_dict = db.meme_info.find_one({"meme_id":meme_id}, {"_id":0})
-    except pyodbc.Error:
+        meme_dict = db.meme_info.find_one({"meme_id":str(meme_id)}, {"_id":0})
+    except:
         return flask.api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    json_object = json.dumps(meme_dict, indent = 4)
-    return json_object
+    return jsonify(meme_dict)

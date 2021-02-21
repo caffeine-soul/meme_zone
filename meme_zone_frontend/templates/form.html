@@ -17,11 +17,10 @@ style="background-color: tomato"
 <nav class="navbar navbar-default">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand" <a href="{{ url_for('routes.start_page') }}">Meme Zone</a>
+        <a class="navbar-brand" <a href={{ url_for('routes.start_page') }}>Meme Zone</a>
       </div>
       <ul class="nav navbar-nav">
-        <li class="active"><a href="{{ url_for('routes.upload_page') }}">Upload Meme</a></li>
-        <li><a href="{{ url_for('routes.memes_get') }}">View Memes</a></li>
+        <li><a href={{ url_for('routes.memes', start_page_var="False") }}>View Memes</a></li>
       </ul>
       <ul class="nav navbar-nav" style="margin-left: auto;">
         <li><a href="{{ url_for('routes.about') }}">About</a></li>
@@ -41,7 +40,7 @@ style="background-color: tomato"
             </div>
             <div class="col-lg-7" style="padding: 10px 100px;">
                  <h3 style="padding-left: 15px; font-weight: bold;">Upload a meme!</h3>
-                 <form action="" method="POST">
+                 <form action={{ url_for('routes.memes', start_page_var="False") }} method="POST">
                     {{ form.csrf_token }}
                      <div class="form-row">
                          <div class="col-lg-7">

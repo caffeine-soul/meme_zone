@@ -1,4 +1,3 @@
-from config import config
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_wtf.csrf import CSRFProtect

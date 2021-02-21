@@ -1,10 +1,8 @@
 import json
 import uuid
-import pyodbc
 import pandas as pd
-from config import config, db
+import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_pymongo import PyMongo
 from libs.uploader_form import meme_info
 from libs.start_page import start_proc
 from flask import Flask, render_template, flash, request
@@ -24,97 +22,59 @@ def start_page():
         form = start_proc()
         render_template("start.html", form=form)
         if request.form.get("submit_btn") == "upload":
-            return redirect(url_for("routes.upload_page"))
+            return redirect(url_for("routes.memes", start_page_var="True"))
         elif request.form.get("submit_btn") == "view":
-            return redirect(url_for("routes.memes_get"))
+            return redirect(url_for("routes.memes", start_page_var="False"))
         else:
             pass
     else:
         form = start_proc()
         return render_template("start.html", form=form)
 
-@app.route("/home", methods=["GET", "POST"])
-def upload_page():
-    print("web/meme/upload_page")
-    is_valid, form = meme_info()
+
+@app.route("/", methods=["POST", "GET"])
+@app.route("/memes", methods=["POST", "GET"])
+def memes():
+    form = meme_info()
     if request.method == "POST":
-        is_valid, form = meme_info()
-        if is_valid:
+        if form.validate_on_submit():
             uploader_name = form["uploader_name"].data
             meme_caption = form["meme_caption"].data
             meme_url = form["meme_url"].data
             another_entry_cb = form["another_entry_cb"].data
-            meme_id = str(uuid.uuid4())
-            insert_dttm = datetime.utcnow()
-            try:
-                db.meme_info.insert_one({ "uploader_name": uploader_name, "meme_caption": meme_caption,
-                "meme_url": meme_url, "meme_id": meme_id, "insert_dttm": insert_dttm})
-            except pyodbc.Error:
-                return flask_api.status.HTTP_500_INTERNAL_SERVER_ERROR
+
+            headers = {
+            'Content-Type': 'application/json',
+            }
+            json_data = { 
+            'name': uploader_name, 'caption': meme_caption, 'url': meme_url
+            }
+            json_object = json.dumps(json_data, indent=4)  
+            response = requests.post('https://meme-zone-v1.herokuapp.com/', headers= headers, data=json_object)
             if another_entry_cb:
                 flash("Uploaded Successfully!")
-                return redirect(url_for("routes.upload_page"))
+                return redirect(url_for("routes.memes", start_page_var="True"))
             else:
-                return redirect(url_for("routes.memes_get"))
+                return redirect(url_for("routes.memes", start_page_var="False"))
+        else:
+            return render_template("form.html", form=form)
     else:
-        return render_template("form.html", form=form)
-
-@app.route("/", methods=["POST"])
-@app.route("/memes", methods=["POST"])
-def api_memes_post():
-    data = request.get_json()
-    uploader_name = data["name"]
-    meme_caption = data["caption"]
-    meme_url = data["url"]
-    meme_id = str(uuid.uuid4())
-    insert_dttm = datetime.utcnow() 
-    try:
-        db.meme_info.insert_one({ "uploader_name": uploader_name, "meme_caption": meme_caption,
-        "meme_url": meme_url, "meme_id": meme_id, "insert_dttm": insert_dttm})
-    except pyodbc.Error:
-        return flask_api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    return jsonify({"id": meme_id})
-
-@app.route("/web/memes", methods=[ "GET"])
-def memes_get():
-    is_valid, form = meme_info()
-    try:
-        df = pd.DataFrame(db.meme_info.find({}, {"_id":0}).sort([("insert_dttm",-1)]).limit(100))
-        meme_list = df.values.tolist()
-    except pyodbc.Error:
-        return flask.api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    return  render_template("index.html", len = len(meme_list), meme_list=meme_list) 
-
-@app.route("/", methods=["GET"])
-@app.route("/memes", methods=[ "GET"])
-def api_memes_get():
-    try:
-        df = pd.DataFrame(db.meme_info.find({}, {"_id":0, "insert_dttm":0}).sort([("insert_dttm",-1)]).limit(100))
-    except pyodbc.Error:
-        return flask.api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    json_parsed = json.loads(df.to_json(orient="records"))
-    return jsonify(json_parsed)
+        if request.args.get('start_page_var')=="True":
+            return render_template("form.html", form=form)
+        else:
+            form = meme_info()
+            data_raw = requests.get('https://meme-zone-v1.herokuapp.com/')
+            return  render_template("index.html", meme_list=data_raw.json())
 
 
 @app.route("/about", methods=["GET"])
 def about():
-    return "<h1>Crio Stage 2B submission by Krishna Maheshwari</h1>"
+    return "<h1>Created with <3 by Krishna Maheshwari!</h1>"
 
 
-@app.route("/web/memes/<meme_id>", methods=["GET"])
+@app.route("/memes/<string:meme_id>", methods=["GET"])
 def get_meme_by_id(meme_id):
-    try:
-        meme_url = db.meme_info.find_one({"meme_id":meme_id}, {"meme_url": 1})
-    except pyodbc.Error:
-        return flask.api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    return render_template("<img src="+ meme_url+ " alt='' style='width: 100%; height: auto;'>")
+    meme_info = requests.get('https://meme-zone-v1.herokuapp.com/memes/'+meme_id)
+    meme_url = meme_info.json()["meme_url"]
+    return "<center> <img src="+ meme_url + " style='width: 100%; height: auto;'></center>"
 
-
-@app.route("/memes/<meme_id>", methods=["GET"])
-def api_get_meme_by_id(meme_id):
-    try:
-        meme_dict = db.meme_info.find_one({"meme_id":meme_id}, {"_id":0})
-    except pyodbc.Error:
-        return flask.api.status.HTTP_500_INTERNAL_SERVER_ERROR
-    json_object = json.dumps(meme_dict, indent = 4)
-    return json_object
